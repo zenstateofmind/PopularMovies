@@ -9,6 +9,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by nikhiljoshi on 1/25/16.
  */
@@ -56,13 +58,13 @@ public class ImageAdapter extends BaseAdapter {
         ImageView imageView;
         if (convertView == null) {
             imageView = new ImageView(context);
-            imageView.setLayoutParams(new GridView.LayoutParams(120, 100));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(8, 8, 8, 8);
+//            imageView.setLayoutParams(new GridView.LayoutParams(120, 100));
+//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+////            imageView.setPadding(8, 8, 8, 8);
+            Picasso.with(context).load(mThumbIds[position]).into(imageView);
         } else {
             imageView = (ImageView) convertView;
         }
-        imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
 }
