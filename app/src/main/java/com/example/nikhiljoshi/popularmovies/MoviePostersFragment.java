@@ -150,6 +150,7 @@ public class MoviePostersFragment extends Fragment {
             // call the url and get all the information -- image urls
             try {
                 final String[] posterPathsFromJson = getPosterPathsFromJson(movieInfoJson);
+                // convert paths to full out urls with w185
                 Log.i(LOG_TAG, "Images have been collected!: " + Arrays.toString(posterPathsFromJson));
                 return posterPathsFromJson;
             } catch (JSONException e) {
