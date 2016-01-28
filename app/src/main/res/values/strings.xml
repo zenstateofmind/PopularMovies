@@ -9,9 +9,11 @@
         <item>Most Popular</item>
         <item>Highest Rated</item>
     </string-array>
-    <string-array name="image_sorting_options_valuees" >
+    <string-array name="image_sorting_options_valuees">
         <item>popularity.desc</item>
         <item>vote_average.desc</item>
         <item></item>
     </string-array>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_detail">Movie Details</string>
 </resources>

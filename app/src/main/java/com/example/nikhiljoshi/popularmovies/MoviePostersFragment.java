@@ -1,5 +1,6 @@
 package com.example.nikhiljoshi.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -46,10 +48,19 @@ public class MoviePostersFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        movieImageAdapter = new MovieImageAdapter(getActivity(), new ArrayList<String>());
+        movieImageAdapter = new MovieImageAdapter(getActivity(), new ArrayList<Movie>());
 
         GridView movie_grid = (GridView) rootView.findViewById(R.id.movieimages_gridview);
         movie_grid.setAdapter(movieImageAdapter);
+        movie_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Movie movie = movieImageAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra("movie", movie);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -68,22 +79,22 @@ public class MoviePostersFragment extends Fragment {
         fetchMovies.execute(sortBy);
     }
 
-    public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
+    public class FetchMovieTask extends AsyncTask<String, Void, Movie[]> {
 
         private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
         @Override
-        protected void onPostExecute(String[] moviesImagePaths) {
-            if (moviesImagePaths != null) {
+        protected void onPostExecute(Movie[] movies) {
+            if (movies != null) {
                 movieImageAdapter.clear();
-                for (String movieImageUrl : moviesImagePaths) {
-                    movieImageAdapter.add(movieImageUrl);
+                for (Movie movie : movies) {
+                    movieImageAdapter.add(movie);
                 }
             }
         }
 
         @Override
-        protected String[] doInBackground(String[] params) {
+        protected Movie[] doInBackground(String[] params) {
 
             // param[0] is going to be a preference whether to sort by
             // popularity of ratings
@@ -150,11 +161,11 @@ public class MoviePostersFragment extends Fragment {
 
             // call the url and get all the information -- image urls
             try {
-                final String[] posterPathsFromJson = getMoviePosterUrlsFromJson(movieInfoJson);
+                final Movie[] movies = getMoviePosterUrlsFromJson(movieInfoJson);
 
-                Log.i(LOG_TAG, "Images have been collected!: " + Arrays.toString(posterPathsFromJson));
+                Log.i(LOG_TAG, "Images have been collected!: " + Arrays.toString(movies));
 
-                return posterPathsFromJson;
+                return movies;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Failed in getting image urls", e);
                 return null;
@@ -189,23 +200,42 @@ public class MoviePostersFragment extends Fragment {
             return builder.build().toString();
         }
 
-        private String[] getMoviePosterUrlsFromJson(String movieInfoJson) throws JSONException {
+        /**
+         *     original title
+         *     movie poster image thumbnail
+         *     A plot synopsis (called overview in the api)
+         *     user rating (called vote_average in the api)
+         *     release date
+         */
+        private Movie[] getMoviePosterUrlsFromJson(String movieInfoJson) throws JSONException {
 
             final String MOVIE_RESULT_LIST = "results";
             final String POSTER_PATH = "poster_path";
+            final String ORIGINAL_TITLE = "original_title";
+            final String OVERVIEW = "overview";
+            final String USER_RATING = "vote_average";
+            final String RELEASE_DATE = "release_date";
 
             JSONObject jsonObject = new JSONObject(movieInfoJson);
             JSONArray moviesInfoArray = jsonObject.getJSONArray(MOVIE_RESULT_LIST);
 
-            String[] posterPathResults = new String[moviesInfoArray.length()];
+            Movie[] movies = new Movie[moviesInfoArray.length()];
 
             for (int i = 0; i < moviesInfoArray.length(); i++) {
                 JSONObject movieInfo = moviesInfoArray.getJSONObject(i);
-                final String moviePath = movieInfo.getString(POSTER_PATH).substring(1);
-                posterPathResults[i] = convertToFullMovieImageUrl(moviePath);
+
+                final String moviePath = convertToFullMovieImageUrl(movieInfo.getString(POSTER_PATH).substring(1));
+                final String originalTitle = movieInfo.getString(ORIGINAL_TITLE);
+                final String overview = movieInfo.getString(OVERVIEW);
+                final String userRating = movieInfo.getString(USER_RATING);
+                final String releaseDate = movieInfo.getString(RELEASE_DATE);
+
+                Movie movie = new Movie(originalTitle, moviePath, overview, userRating, releaseDate);
+
+                movies[i] = movie;
             }
 
-            return posterPathResults;
+            return movies;
         }
     }
 }

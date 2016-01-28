@@ -17,9 +17,9 @@ import java.util.List;
  * Created by nikhiljoshi on 1/27/16.
  * Guided by code in android-custom-arrayadapter from udacity github
  */
-public class MovieImageAdapter extends ArrayAdapter<String> {
+public class MovieImageAdapter extends ArrayAdapter<Movie> {
 
-    public MovieImageAdapter(Activity context, List<String> movieImagesUrls) {
+    public MovieImageAdapter(Activity context, List<Movie> movieImagesUrls) {
         super(context, 0, movieImagesUrls);
     }
 
@@ -27,7 +27,8 @@ public class MovieImageAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         //Get the Image for the movie at that specific location
-        String movieImageUrl = getItem(position);
+        final Movie currentMovie = getItem(position);
+        String movieImageUrl = currentMovie.getPosterImageUrl();
 
         if (convertView == null) {
             // If a view isnt present, then obtain the LayoutInflater from the current context,
