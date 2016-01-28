@@ -8,9 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,12 +20,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MoviePostersFragment extends Fragment {
+
+    private MovieImageAdapter movieImageAdapter;
 
     public MoviePostersFragment() {
 
@@ -43,29 +44,23 @@ public class MoviePostersFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        // figure out a way to grab all the image urls from movie db
+        movieImageAdapter = new MovieImageAdapter(getActivity(), new ArrayList<String>());
 
-
-        // see if I need to come up with an ImageView for a sample image and create an array
-        // adapter for that, similar to the way its done in ArrayAdapter
-
-        // Once that is done, see if you can serve images through the GridView
-
-
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
-        gridView.setAdapter(new ImageAdapter(getContext()));
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(), position + "", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        FetchMovieTask task = new FetchMovieTask();
-        task.execute("popularity.desc");
+        GridView movie_grid = (GridView) rootView.findViewById(R.id.movieimages_gridview);
+        movie_grid.setAdapter(movieImageAdapter);
 
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateMovies();
+    }
+
+    private void updateMovies() {
+        FetchMovieTask fetchMovies = new FetchMovieTask();
+        fetchMovies.execute("popularity.desc");
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
@@ -75,7 +70,10 @@ public class MoviePostersFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] moviesImagePaths) {
             if (moviesImagePaths != null) {
-                // put the images in right here
+                movieImageAdapter.clear();
+                for (String movieImageUrl : moviesImagePaths) {
+                    movieImageAdapter.add(movieImageUrl);
+                }
             }
         }
 
@@ -84,8 +82,6 @@ public class MoviePostersFragment extends Fragment {
 
             // param[0] is going to be a preference whether to sort by
             // popularity of ratings
-
-            // get url
             String movieDbUrlStr = getUrl(params[0]);
 
             /**
@@ -149,15 +145,29 @@ public class MoviePostersFragment extends Fragment {
 
             // call the url and get all the information -- image urls
             try {
-                final String[] posterPathsFromJson = getPosterPathsFromJson(movieInfoJson);
-                // convert paths to full out urls with w185
+                final String[] posterPathsFromJson = getMoviePosterUrlsFromJson(movieInfoJson);
+
                 Log.i(LOG_TAG, "Images have been collected!: " + Arrays.toString(posterPathsFromJson));
+
                 return posterPathsFromJson;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Failed in getting image urls", e);
                 return null;
             }
 
+        }
+
+        private String convertToFullMovieImageUrl(String moviePath) {
+            //http://image.tmdb.org/t/p/w185/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
+            Log.i(LOG_TAG, "path: " + moviePath);
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("http")
+                    .authority("image.tmdb.org")
+                    .appendPath("t")
+                    .appendPath("p")
+                    .appendPath("w185")
+                    .appendPath(moviePath);
+            return builder.build().toString();
         }
 
         private String getUrl(String sortByMetric) {
@@ -174,7 +184,7 @@ public class MoviePostersFragment extends Fragment {
             return builder.build().toString();
         }
 
-        private String[] getPosterPathsFromJson(String movieInfoJson) throws JSONException {
+        private String[] getMoviePosterUrlsFromJson(String movieInfoJson) throws JSONException {
 
             final String MOVIE_RESULT_LIST = "results";
             final String POSTER_PATH = "poster_path";
@@ -186,7 +196,8 @@ public class MoviePostersFragment extends Fragment {
 
             for (int i = 0; i < moviesInfoArray.length(); i++) {
                 JSONObject movieInfo = moviesInfoArray.getJSONObject(i);
-                posterPathResults[i] = movieInfo.getString(POSTER_PATH);
+                final String moviePath = movieInfo.getString(POSTER_PATH).substring(1);
+                posterPathResults[i] = convertToFullMovieImageUrl(moviePath);
             }
 
             return posterPathResults;

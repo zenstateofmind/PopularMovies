@@ -22,7 +22,7 @@
     <GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/gridview"
+        android:id="@+id/movieimages_gridview"
         android:numColumns="auto_fit"
         android:verticalSpacing="1dp"
         android:horizontalSpacing="1dp"
