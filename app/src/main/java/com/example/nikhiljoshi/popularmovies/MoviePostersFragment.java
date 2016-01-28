@@ -1,7 +1,9 @@
 package com.example.nikhiljoshi.popularmovies;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,8 +61,11 @@ public class MoviePostersFragment extends Fragment {
     }
 
     private void updateMovies() {
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final String sortBy = sharedPreferences.getString(getString(R.string.image_sorting_key), getString(R.string.image_sorting_default));
+
         FetchMovieTask fetchMovies = new FetchMovieTask();
-        fetchMovies.execute("popularity.desc");
+        fetchMovies.execute(sortBy);
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, String[]> {

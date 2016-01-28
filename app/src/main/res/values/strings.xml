@@ -1,4 +1,17 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
+    <string name="image_sorting">Image Sort Order</string>
+    <string name="image_sorting_key">imageSortOrder</string>
+    <string name="image_sorting_default">popularity.desc</string>
+    <string name="settings_activity">Settings</string>
+    <string-array name="image_sorting_options">
+        <item>Most Popular</item>
+        <item>Highest Rated</item>
+    </string-array>
+    <string-array name="image_sorting_options_valuees" >
+        <item>popularity.desc</item>
+        <item>vote_average.desc</item>
+        <item></item>
+    </string-array>
 </resources>

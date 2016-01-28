@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListPreference
+        android:title="@string/image_sorting"
+        android:key="@string/image_sorting_key"
+        android:defaultValue="@string/image_sorting_default"
+        android:entries="@array/image_sorting_options"
+        android:entryValues="@array/image_sorting_options_valuees" />
+
+</PreferenceScreen>
